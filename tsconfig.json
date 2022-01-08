@@ -1,0 +1,18 @@
+{
+    "compilerOptions": {
+        "moduleResolution": "node",
+        "target": "es6",
+        "module": "commonjs",
+        "lib": ["es6", "dom"],
+        "types": ["node"],
+        "sourceMap": true,
+        "esModuleInterop": true,
+        "allowSyntheticDefaultImports": true,
+        "experimentalDecorators": true,
+        "emitDecoratorMetadata": true,
+        "resolveJsonModule": true,
+        "typeRoots": ["node_modules/@types"]
+    },
+    "include": ["src/**/*.ts", "scripts/deploy-commands.ts"],
+    "exclude": ["node_modues"]
+}
