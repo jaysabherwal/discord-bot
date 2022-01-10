@@ -1,4 +1,4 @@
-# Random Discord Bot
+# Discord Music Bot
 
 ## Commands
 
