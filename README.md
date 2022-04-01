@@ -2,6 +2,7 @@
 
 ## Commands
 
+All commands are registered with the discord api and are prefixed with `/` as like running any command on discord.
 
 ## Working with the Bot
 
