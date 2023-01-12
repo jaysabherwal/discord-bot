@@ -4,8 +4,7 @@
   "description": "Expandable TypeScript Discord Bot",
   "main": "index.js",
   "scripts": {
-    "start": "nodemon",
-    "test": ""
+    "start": "nodemon"
   },
   "author": "Jay Sabherwal",
   "license": "ISC",
