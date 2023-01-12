@@ -1,6 +1,7 @@
 {
     "compilerOptions": {
         "moduleResolution": "node",
+        "outDir": "build",
         "target": "es6",
         "module": "commonjs",
         "lib": ["es6", "dom"],

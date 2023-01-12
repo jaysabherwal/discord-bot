@@ -61,7 +61,7 @@ export class Bot {
                 return;
             }
 
-            await commandHandler.executeCommand(
+            commandHandler.executeCommand(
                 {
                     interaction, 
                     audioHandlers: this.audioHandlers

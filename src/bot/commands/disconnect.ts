@@ -1,8 +1,7 @@
-import { CommandInteraction } from "discord.js";
 import { SlashCommandBuilder } from '@discordjs/builders';
 import { Command } from "../util/models/command";
 import { VoiceConnection } from "@discordjs/voice";
-import { AudioHandler } from "../util/models/audio-handler";
+import { AudioCommandInput } from "../util/models/audio-command-input";
 
 export default class implements Command {
 
@@ -10,7 +9,7 @@ export default class implements Command {
         .setName('disconnect')
         .setDescription('Disconnect the bot from the voice channel');
 
-    async execute({ interaction, audioHandlers }: { interaction: CommandInteraction, audioHandlers: Map<string, AudioHandler>}) {
+    async execute({ interaction, audioHandlers }: AudioCommandInput): Promise<void> {
         const vc: VoiceConnection = audioHandlers.get(interaction.guildId)?.voiceConnection;
         const username = interaction.client.user.username;
 

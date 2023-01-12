@@ -1,8 +1,7 @@
-import { CommandInteraction } from "discord.js";
 import { SlashCommandBuilder } from '@discordjs/builders';
 import { Command } from "../util/models/command";
 import { AudioPlayer } from "@discordjs/voice";
-import { AudioHandler } from "../util/models/audio-handler";
+import { AudioCommandInput } from "../util/models/audio-command-input";
 
 export default class implements Command {
 
@@ -10,7 +9,7 @@ export default class implements Command {
         .setName('skip')
         .setDescription('Skip the current song');
 
-    async execute({ interaction, audioHandlers }: { interaction: CommandInteraction, audioHandlers: Map<string, AudioHandler>}) {
+    async execute({ interaction, audioHandlers }: AudioCommandInput): Promise<void> {
         const ap: AudioPlayer = audioHandlers.get(interaction.guildId)?.audioPlayer;
 
         if (!ap) {
@@ -18,7 +17,6 @@ export default class implements Command {
         }
 
         return ap.stop(true) ? await interaction.reply(`Successfully skipped song`) : await interaction.reply(`:sad: Failed to skip song`);
-        
     }
 }
 

@@ -1,8 +1,8 @@
 import { SlashCommandBuilder } from '@discordjs/builders';
-import { CommandInteraction, MessageEmbed } from 'discord.js';
+import { MessageEmbed } from 'discord.js';
 import { Command } from "../util/models/command";
-import { AudioHandler } from '../util/models/audio-handler';
 import { Song } from '../util/models/song';
+import { AudioCommandInput } from "../util/models/audio-command-input";
 
 export default class implements Command {
 
@@ -10,7 +10,7 @@ export default class implements Command {
         .setName('queue')
         .setDescription('Display the current queue');
 
-    async execute({ interaction, audioHandlers }: { interaction: CommandInteraction, audioHandlers: Map<string, AudioHandler>}) {
+    async execute({ interaction, audioHandlers }: AudioCommandInput): Promise<void> {
         let queue: Song[] = audioHandlers.get(interaction.guildId)?.queue;
 
         let desc = '';

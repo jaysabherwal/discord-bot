@@ -1,5 +1,6 @@
-import { Collection } from "discord.js";
+import { CacheType, Collection, CommandInteraction } from "discord.js";
 import { readdirSync } from "fs";
+import { AudioHandler } from "./util/models/audio-handler";
 import { Command } from "./util/models/command";
 
 export class CommandHandler {
@@ -10,21 +11,23 @@ export class CommandHandler {
         this.getCommands();
     }
 
-    executeCommand(params) {
+    executeCommand = async (params: { interaction: CommandInteraction<CacheType>, audioHandlers: Map<string, AudioHandler> }) => {
         const { interaction } = params;
         const command = this.commands.get(interaction.commandName);
 
-        if (!command) return;
-    
+        if (!command) {
+            return;
+        }
+        
         try {
-            command.execute(params);
+            await command.execute(params);
         } catch (error) {
             console.error(error);
             interaction.reply({ content: ':sad: There was an error while executing this command', ephemeral: true });
         }
     }
 
-    private getCommands() {
+    private getCommands = () => {
         const files = readdirSync(`${__dirname}/commands`).filter(file => file.endsWith('.ts'));
         files.forEach(file => {
             const _class = require(`./commands/${file.split(".")[0]}`);

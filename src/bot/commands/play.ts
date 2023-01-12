@@ -1,11 +1,9 @@
 import { SlashCommandBuilder } from '@discordjs/builders';
 import { Command } from "../util/models/command";
-import { AudioPlayer, AudioPlayerStatus, createAudioPlayer, createAudioResource, DiscordGatewayAdapterCreator, entersState, joinVoiceChannel, VoiceConnection, VoiceConnectionStatus } from "@discordjs/voice";
-import { CommandInteraction } from 'discord.js';
+import { AudioPlayerStatus, createAudioPlayer, createAudioResource, DiscordGatewayAdapterCreator, entersState, joinVoiceChannel, VoiceConnection, VoiceConnectionStatus } from "@discordjs/voice";
+import { AudioCommandInput } from "../util/models/audio-command-input";
 import youtube_url_finder from "../util/video-finder";
 import ytdl from 'ytdl-core';
-import { AudioHandler } from '../util/models/audio-handler';
-import { YTSearch } from 'ytsearcher';
 
 export default class implements Command {
 
@@ -14,7 +12,7 @@ export default class implements Command {
         .setDescription('Play the sound of a video from YouTube')
         .setName('play')
 
-    async execute({ interaction, audioHandlers }: { interaction: CommandInteraction, audioHandlers: Map<string, AudioHandler>}) {
+    async execute({ interaction, audioHandlers }: AudioCommandInput): Promise<void> {
         let vc = audioHandlers.get(interaction.guildId)?.voiceConnection;
 
         if (!vc) {

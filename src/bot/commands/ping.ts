@@ -8,7 +8,7 @@ export default class implements Command {
         .setName('ping')
         .setDescription('pong?');
 
-    async execute({ interaction }: { interaction: CommandInteraction }) {
+    async execute({ interaction }: { interaction: CommandInteraction }): Promise<void> {
         await interaction.reply('Pong!');
     }
 }
