@@ -57,16 +57,20 @@ export class Bot {
 
     private startListening(commandHandler: CommandHandler) {
         this.client.on('interactionCreate', async interaction => {
-            if (!interaction.isCommand()) {
-                return;
-            }
-
-            commandHandler.executeCommand(
-                {
-                    interaction, 
-                    audioHandlers: this.audioHandlers
+            try {
+                if (!interaction.isCommand()) {
+                    return;
                 }
-            );
+    
+                commandHandler.executeCommand(
+                    {
+                        interaction, 
+                        audioHandlers: this.audioHandlers
+                    }
+                );
+            } catch (err) {
+                console.error(err);
+            }
         });
     }
 }

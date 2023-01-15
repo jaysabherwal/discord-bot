@@ -11,7 +11,7 @@ All commands are registered with the discord api and are prefixed with `/` as li
 1. Install Node
 2. Rename `.env.template` to `.env` and fill in the information within the file. 
 3. Run `npm install` within the project folder.
-4. Run `npm start` to start the bot.
+4. Run `npm start-dev` to start the bot.
 
 ### How commands work
 
