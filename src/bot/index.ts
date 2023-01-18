@@ -1,4 +1,4 @@
-import { Client, Collection, Intents } from 'discord.js';
+import { Client, Collection, Intents, Interaction } from 'discord.js';
 import { CommandHandler } from './command-handler';
 import { Command } from './util/models/command';
 import { REST } from '@discordjs/rest';
@@ -43,25 +43,27 @@ export class Bot {
         commands.forEach(command => {
             toRegister.push(command.data.toJSON());
         });
-
+        
         const rest = new REST({ version: '9' }).setToken(process.env.DISCORD_TOKEN);
 
         if (process.env.DEV === 'true') {
             rest.put(Routes.applicationGuildCommands(process.env.CLIENT_ID, process.env.GUILD_ID), { body: toRegister })
-                .then(() => console.log('Successfully registered application commands.'))
+                .then(() => console.log('Successfully registered application commands in DEV.'))
                 .catch(console.error);
         } else {
-            rest.put(Routes.applicationCommands(process.env.CLIENT_ID), { body: toRegister });
+            rest.put(Routes.applicationCommands(process.env.CLIENT_ID), { body: toRegister })
+                .then(() => console.log('Successfully registered application commands in PRODUCTION.'))
+                .catch(console.error);
         }
     }
 
     private startListening(commandHandler: CommandHandler) {
-        this.client.on('interactionCreate', async interaction => {
+        this.client.on('interactionCreate', async (interaction: Interaction) => {
             try {
                 if (!interaction.isCommand()) {
                     return;
                 }
-    
+
                 commandHandler.executeCommand(
                     {
                         interaction, 

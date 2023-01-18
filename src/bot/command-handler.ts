@@ -13,13 +13,15 @@ export class CommandHandler {
 
     executeCommand = async (params: { interaction: CommandInteraction<CacheType>, audioHandlers: Map<string, AudioHandler> }) => {
         const { interaction } = params;
-        const command = this.commands.get(interaction.commandName);
+        const command = this.commands.get(JSON.stringify(interaction.commandName, null, 2));
 
         if (!command) {
+            console.log(`Command not found: ${command}`);
             return;
         }
         
         try {
+            console.log(`Executing command: ${command}`);
             await command.execute(params);
         } catch (error) {
             console.error(error);
