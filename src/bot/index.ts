@@ -39,7 +39,7 @@ export class Bot {
     }
 
     private registerCommands(commands: Collection<string, Command>) {
-        const toRegister = commands.forEach(command => {
+        const toRegister = commands.map(command => {
             return command.data.toJSON();
         });
         
