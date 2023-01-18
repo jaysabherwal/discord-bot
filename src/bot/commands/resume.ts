@@ -2,6 +2,7 @@ import { SlashCommandBuilder } from '@discordjs/builders';
 import { AudioPlayer } from '@discordjs/voice';
 import { Command } from "../util/models/command";
 import { AudioCommandInput } from '../util/models/audio-command-input';
+import { InteractionResponse } from 'discord.js';
 
 export default class implements Command {
 
@@ -9,7 +10,7 @@ export default class implements Command {
         .setName('resume')
         .setDescription('Resume playback');
 
-    async execute({ interaction, audioHandlers }: AudioCommandInput): Promise<void> {
+    async execute({ interaction, audioHandlers }: AudioCommandInput): Promise<InteractionResponse> {
         const ap: AudioPlayer = audioHandlers.get(interaction.guildId)?.audioPlayer;
 
         if (!ap) {

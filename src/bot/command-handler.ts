@@ -1,6 +1,6 @@
-import { CacheType, Collection, CommandInteraction } from "discord.js";
+import { Collection } from "discord.js";
 import { readdirSync } from "fs";
-import { AudioHandler } from "./util/models/audio-handler";
+import { AudioCommandInput } from "./util/models/audio-command-input";
 import { Command } from "./util/models/command";
 
 export class CommandHandler {
@@ -11,18 +11,17 @@ export class CommandHandler {
         this.getCommands();
     }
 
-    executeCommand = async (params: { interaction: CommandInteraction<CacheType>, audioHandlers: Map<string, AudioHandler> }) => {
-        const { interaction } = params;
-        const command = this.commands.get(JSON.stringify(interaction.commandName, null, 2));
+    executeCommand = async ({ interaction, audioHandlers }: AudioCommandInput) => {
+        const command = this.commands.get(interaction.commandName);
 
         if (!command) {
             console.log(`Command not found: ${command}`);
-            return;
+            return await interaction.reply('Command not found!');
         }
         
         try {
             console.log(`Executing command: ${command}`);
-            await command.execute(params);
+            await command.execute({ interaction, audioHandlers });
         } catch (error) {
             console.error(error);
             interaction.reply({ content: ':sad: There was an error while executing this command', ephemeral: true });

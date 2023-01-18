@@ -1,4 +1,4 @@
-import { CommandInteraction } from "discord.js";
+import { CommandInteraction, InteractionResponse } from "discord.js";
 import { SlashCommandBuilder } from '@discordjs/builders';
 import { Command } from "../util/models/command";
 
@@ -8,8 +8,8 @@ export default class implements Command {
         .setName('ping')
         .setDescription('pong?');
 
-    async execute({ interaction }: { interaction: CommandInteraction }): Promise<void> {
-        await interaction.reply('Pong!');
+    async execute({ interaction }: { interaction: CommandInteraction }): Promise<InteractionResponse> {
+        return await interaction.reply('Pong!');
     }
 }
 

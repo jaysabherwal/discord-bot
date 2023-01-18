@@ -1,4 +1,4 @@
-import { Client, Collection, Intents, Interaction } from 'discord.js';
+import { Client, Collection, Events, GatewayIntentBits, Interaction } from 'discord.js';
 import { CommandHandler } from './command-handler';
 import { Command } from './util/models/command';
 import { REST } from '@discordjs/rest';
@@ -12,8 +12,8 @@ export class Bot {
     constructor() {
         this.client = new Client({
             intents: [
-                Intents.FLAGS.GUILDS,
-                Intents.FLAGS.GUILD_VOICE_STATES
+                GatewayIntentBits.Guilds,
+                GatewayIntentBits.GuildVoiceStates
             ]
         });
 
@@ -21,11 +21,11 @@ export class Bot {
 
         this.audioHandlers = new Map<string, AudioHandler>();
         
-        this.client.on('ready', () => {
+        this.client.on(Events.ClientReady, () => {
             console.log(`Logged in as ${this.client.user.tag}`)
         });
         
-        this.client.on('disconnect', () => {
+        this.client.on(Events.ShardDisconnect, () => {
             console.log(`Disconnected...`)
         });
 
@@ -39,12 +39,11 @@ export class Bot {
     }
 
     private registerCommands(commands: Collection<string, Command>) {
-        const toRegister = [];
-        commands.forEach(command => {
-            toRegister.push(command.data.toJSON());
+        const toRegister = commands.forEach(command => {
+            return command.data.toJSON();
         });
         
-        const rest = new REST({ version: '9' }).setToken(process.env.DISCORD_TOKEN);
+        const rest = new REST({ version: '10' }).setToken(process.env.DISCORD_TOKEN);
 
         if (process.env.DEV === 'true') {
             rest.put(Routes.applicationGuildCommands(process.env.CLIENT_ID, process.env.GUILD_ID), { body: toRegister })
@@ -58,7 +57,7 @@ export class Bot {
     }
 
     private startListening(commandHandler: CommandHandler) {
-        this.client.on('interactionCreate', async (interaction: Interaction) => {
+        this.client.on(Events.InteractionCreate, (interaction: Interaction) => {
             try {
                 if (!interaction.isCommand()) {
                     return;

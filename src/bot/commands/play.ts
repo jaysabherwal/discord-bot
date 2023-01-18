@@ -4,6 +4,7 @@ import { AudioPlayerStatus, createAudioPlayer, createAudioResource, DiscordGatew
 import { AudioCommandInput } from "../util/models/audio-command-input";
 import youtube_url_finder from "../util/video-finder";
 import ytdl from 'ytdl-core';
+import { InteractionResponse } from 'discord.js';
 
 export default class implements Command {
 
@@ -12,7 +13,7 @@ export default class implements Command {
         .setDescription('Play the sound of a video from YouTube')
         .setName('play')
 
-    async execute({ interaction, audioHandlers }: AudioCommandInput): Promise<void> {
+    async execute({ interaction, audioHandlers }: AudioCommandInput): Promise<InteractionResponse> {
         let vc = audioHandlers.get(interaction.guildId)?.voiceConnection;
 
         if (!vc) {
@@ -58,7 +59,7 @@ export default class implements Command {
         }
 
         try {
-            const { first: video  } = await youtube_url_finder.find(interaction.options.getString('query'));
+            const { first: video  } = await youtube_url_finder.find(interaction.options.get('query').value as string);
 
             const song = {
                 url: video.url,
