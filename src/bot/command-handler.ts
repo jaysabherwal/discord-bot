@@ -15,12 +15,12 @@ export class CommandHandler {
         const command = this.commands.get(interaction.commandName);
 
         if (!command) {
-            console.log(`Command not found: ${command}`);
+            console.log(`Command not found: ${JSON.stringify(command)}`);
             return await interaction.reply('Command not found!');
         }
         
         try {
-            console.log(`Executing command: ${command}`);
+            console.log(`Executing command: ${JSON.stringify(command)}`);
             await command.execute({ interaction, audioHandlers });
         } catch (error) {
             console.error(error);
@@ -28,11 +28,14 @@ export class CommandHandler {
         }
     }
 
-    private getCommands = () => {
-        const files = readdirSync(`${__dirname}/commands`).filter(file => file.endsWith('.ts'));
+    private getCommands = (): void => {
+        const files = readdirSync(`${__dirname}/commands`).filter(file => (file.endsWith('.ts') || file.endsWith('.js')));
         files.forEach(file => {
             const _class = require(`./commands/${file.split(".")[0]}`);
-            let command = new _class.default;
+            let command: Command = new _class.default;
+
+            console.log(`Registered command: ${command.data.name}`);
+
             this.commands.set(command.data.name, command);
         });
     }
