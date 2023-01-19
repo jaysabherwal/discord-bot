@@ -22,11 +22,11 @@ export class Bot {
         this.audioHandlers = new Map<string, AudioHandler>();
         
         this.client.on(Events.ClientReady, () => {
-            console.log(`Logged in as ${this.client.user.tag}`)
+            console.info(`Logged in as ${this.client.user.tag}`)
         });
         
         this.client.on(Events.ShardDisconnect, () => {
-            console.log(`Disconnected...`)
+            console.info(`Disconnected...`)
         });
 
         this.login();

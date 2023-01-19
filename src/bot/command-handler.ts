@@ -15,16 +15,16 @@ export class CommandHandler {
         const command = this.commands.get(interaction.commandName);
 
         if (!command) {
-            console.log(`Command not found: ${JSON.stringify(command)}`);
+            console.info(`Command not found: ${JSON.stringify(command)}`, interaction.guildId);
             return await interaction.reply('Command not found!');
         }
         
         try {
-            console.log(`Executing command: ${JSON.stringify(command)}`);
+            console.info(`Executing command: ${JSON.stringify(command)}`, interaction.guildId);
             await command.execute({ interaction, audioHandlers });
         } catch (error) {
             console.error(error);
-            interaction.reply({ content: ':sad: There was an error while executing this command', ephemeral: true });
+            interaction.reply({ content: ':sob: There was an error while executing this command', ephemeral: true });
         }
     }
 
@@ -34,9 +34,9 @@ export class CommandHandler {
             const _class = require(`./commands/${file.split(".")[0]}`);
             let command: Command = new _class.default;
 
-            console.log(`Registered command: ${command.data.name}`);
+            console.info(`Registered command: ${command.data.name}`);
 
             this.commands.set(command.data.name, command);
-        });
+        }); 
     }
 }

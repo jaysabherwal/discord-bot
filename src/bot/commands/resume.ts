@@ -14,7 +14,7 @@ export default class implements Command {
         const ap: AudioPlayer = audioHandlers.get(interaction.guildId)?.audioPlayer;
 
         if (!ap) {
-            return await interaction.reply(':sad: Bot was not playing anything');
+            return await interaction.reply(':sob: Bot was not playing anything');
         }
 
         return ap.unpause() ? await interaction.reply('Resumed!') : await interaction.reply('Failed to resume audio');

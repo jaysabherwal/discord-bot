@@ -61,6 +61,13 @@ export default class implements Command {
         try {
             const { first: video  } = await youtube_url_finder.find(interaction.options.get('query').value as string);
 
+            if (!video) {
+                console.info('Video not found.');
+                throw new Error('Video not found.');
+            }
+
+            console.info('YT video found')
+
             const song = {
                 url: video.url,
                 title: video.title,
@@ -72,9 +79,16 @@ export default class implements Command {
                 queue.push(song);
                 return await interaction.reply(`Added song to the queue`);
             } else {
-                const resource = createAudioResource(ytdl(song.url, { filter: 'audioonly', quality: 'highestaudio' }));
-                audioPlayer.play(resource);
-                return await interaction.reply(`Playing song`);
+                try {
+                    console.info('Creating audio resource');
+                    const resource = createAudioResource(ytdl(song.url, { filter: 'audioonly', quality: 'highestaudio' }));
+                    audioPlayer.play(resource);
+                    console.info('Playing video');
+                    return await interaction.reply(`Playing video: ${song.title}`);
+                } catch (e) {
+                    return await interaction.reply(`:sob: Error playing video`);
+                }   
+                
             }
         } catch (e) {
             return await interaction.reply(`:sob: Error finding video`);

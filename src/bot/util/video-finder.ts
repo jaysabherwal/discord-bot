@@ -18,13 +18,17 @@ const URL_REGEX = new RegExp('^(https?:\\/\\/)?' +
 export = {
     find: async function (query: string): Promise<any> {
         if (URL_REGEX.test(query)) {
+            console.info('Query is a URL')
             if (ytdl.validateURL(query)) {
+                console.info('Query URL is a valid video')
                 return query;
             } else {
+                console.info('Query URL is NOT a valid video')
                 throw new Error('URL does not map to a video');
             }
         }
 
+        console.info(`Finding URL for query: ${query}`)
         return youtube.search(query, options);
     }
 }

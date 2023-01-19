@@ -14,7 +14,7 @@ export default class implements Command {
         const ap: AudioPlayer = audioHandlers.get(interaction.guildId)?.audioPlayer;
 
         if (!ap) {
-            return await interaction.reply(`:sad: ${interaction.client.user.username} is not playing anything`);
+            return await interaction.reply(`:sob: ${interaction.client.user.username} is not playing anything`);
         }
         
         return ap.pause() ? await interaction.reply('Paused!') : await interaction.reply('Failed to pause audio');
