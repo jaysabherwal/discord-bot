@@ -23,9 +23,9 @@
     "libsodium-wrappers": "0.7.10",
     "typescript": "4.9.4",
     "utf-8-validate": "6.0.0",
+    "youtube-search": "^1.1.6",
     "ytdl": "1.4.1",
     "ytdl-core": "^4.11.2",
-    "ytsearcher": "1.2.4",
     "zlib-sync": "0.1.7"
   },
   "devDependencies": {
