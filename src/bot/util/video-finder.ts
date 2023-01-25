@@ -1,5 +1,5 @@
 import ytdl from 'ytdl-core';
-import youtubeSearch from "youtube-search";
+import superagent from 'superagent';
 
 const URL_REGEX = new RegExp('^(https?:\\/\\/)?' +
     '((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.)+[a-z]{2,}|' +
@@ -8,13 +8,10 @@ const URL_REGEX = new RegExp('^(https?:\\/\\/)?' +
     '(\\?[;&a-z\\d%_.~+=-]*)?' +
     '(\\#[-a-z\\d_]*)?$', 'i');
 
-var opts: youtubeSearch.YouTubeSearchOptions = {
-    maxResults: 2,
-    key: process.env.YOUTUBE_API_KEY
-};
+const BASE_URL = 'https://www.googleapis.com/youtube/v3/search';
 
-export = {
-    find: async function (query: string): Promise<{ link?: string, title?: string }> {
+export class VideoFinder {
+    find = async (query: string): Promise<{ link: string, title?: string }> => {
         if (URL_REGEX.test(query)) {
             console.info('Query is a URL')
             if (ytdl.validateURL(query)) {
@@ -26,23 +23,46 @@ export = {
             }
         }
 
-        console.info(`Finding URL for query: ${query}`)
+        console.info(`Finding URL for query: ${query}`);
 
         try {
-            const { results } = await youtubeSearch(query, opts);
-
-            if (results.length === 0) {
-                throw new Error(`Could not find video from query: ${query}`);
-            }
-    
-            const { link, title } = results[0];
-    
-            console.info(`Found video for query ${query}: ${title}`);
-    
-            return { link, title };
+            return await this.videoSearch(query);
         } catch (err) {
             console.error(`Issue when searching for video`, err);
             throw new Error(`Issue searching for video`)
         }
-    }
+    };
+
+    private videoSearch = async (query: string) => {
+        const params = {
+            key: process.env.YOUTUBE_API_KEY,
+            q: encodeURIComponent(query),
+            maxResults: 2,
+            part: 'snippet'
+        };
+
+        let response = await superagent
+            .get(`${BASE_URL}?${this.toQueryString(params)}`)
+            .set('Accept', 'application/json');
+
+        if (response.body?.items.length) {
+            const title = response.body?.items[0].snippet.title
+            console.log(`Video found`, title)
+            return {
+                link: `https://www.youtube.com/watch?v=${response.body?.items[0].id.videoId}`,
+                title
+            };
+        } else {
+            throw new Error(`Could not find video from query: ${query}`);
+        }
+    };
+
+    private toQueryString = (obj: any) => {
+        var str = [];
+        for (let p in obj)
+          if (obj.hasOwnProperty(p)) {
+            str.push(encodeURIComponent(p) + "=" + encodeURIComponent(obj[p]));
+          }
+        return str.join("&");
+    };
 }

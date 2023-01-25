@@ -47,7 +47,7 @@ export class Bot {
 
         if (process.env.DEV === 'true') {
             rest.put(Routes.applicationGuildCommands(process.env.CLIENT_ID, process.env.GUILD_ID), { body: toRegister })
-                .then(() => console.log('Successfully registered application commands in DEV.'))
+                .then(() => console.log(`Successfully registered application commands in DEV for guild: ${process.env.GUILD_ID}.`))
                 .catch(console.error);
         } else {
             rest.put(Routes.applicationCommands(process.env.CLIENT_ID), { body: toRegister })

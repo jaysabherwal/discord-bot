@@ -2,9 +2,9 @@ import { SlashCommandBuilder } from '@discordjs/builders';
 import { Command } from "../util/models/command";
 import { AudioPlayerStatus, createAudioPlayer, createAudioResource, DiscordGatewayAdapterCreator, entersState, joinVoiceChannel, VoiceConnection, VoiceConnectionStatus } from "@discordjs/voice";
 import { AudioCommandInput } from "../util/models/audio-command-input";
-import youtube_url_finder from "../util/video-finder";
 import ytdl from 'ytdl-core';
 import { InteractionResponse } from 'discord.js';
+import { VideoFinder } from '../util/video-finder';
 
 export default class implements Command {
 
@@ -59,7 +59,7 @@ export default class implements Command {
         }
 
         try {
-            const { link, title } = await youtube_url_finder.find(interaction.options.get('query').value as string);
+            const { link, title } = await new VideoFinder().find(interaction.options.get('query').value as string);
 
             const song = {
                 url: link,
