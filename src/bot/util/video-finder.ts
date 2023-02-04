@@ -26,7 +26,7 @@ export class VideoFinder {
         console.info(`Finding URL for query: ${query}`);
 
         try {
-            return await this.videoSearch(query);
+            return this.videoSearch(query);
         } catch (err) {
             console.error(`Issue when searching for video`, err);
             throw new Error(`Issue searching for video`)
