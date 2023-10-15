@@ -15,15 +15,15 @@ export class CommandHandler {
         const command = this.commands.get(interaction.commandName);
 
         if (!command) {
-            console.info(`Command not found: ${JSON.stringify(command)}`, interaction.guildId);
-            return await interaction.reply('Command not found!');
+            console.warn(`Command not found: ${JSON.stringify(command)}`, `id: ${interaction.id}`);
+            interaction.reply('Command not found!');
         }
         
         try {
-            console.info(`Executing command: ${JSON.stringify(command)}`, interaction.guildId);
-            await command.execute({ interaction, audioHandlers });
+            console.info(`Executing command: ${JSON.stringify(command)}`, `id: ${interaction.id}`);
+            command.execute({ interaction, audioHandlers });
         } catch (error) {
-            console.error(error);
+            console.error(`Error thrown while executing command`, JSON.stringify(error), `id: ${interaction.id}`);
             interaction.reply({ content: ':sob: There was an error while executing this command', ephemeral: true });
         }
     }

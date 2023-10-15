@@ -10,28 +10,27 @@
   "author": "Jay Sabherwal",
   "license": "ISC",
   "dependencies": {
-    "@discordjs/builders": "1.4.0",
+    "@discordjs/builders": "1.6.5",
     "@discordjs/opus": "0.9.0",
-    "@discordjs/rest": "1.5.0",
-    "@discordjs/voice": "0.14.0",
+    "@discordjs/rest": "2.0.1",
+    "@discordjs/voice": "0.16.0",
     "bufferutil": "4.0.7",
-    "discord-api-types": "0.37.28",
-    "discord.js": "14.7.1",
-    "dotenv": "16.0.3",
+    "discord-api-types": "0.37.60",
+    "discord.js": "14.13.0",
+    "dotenv": "16.3.1",
     "erlpack": "github:discord/erlpack",
-    "ffmpeg-static": "5.1.0",
-    "libsodium-wrappers": "0.7.10",
-    "superagent": "^8.0.9",
-    "typescript": "4.9.4",
-    "utf-8-validate": "6.0.0",
+    "ffmpeg-static": "5.2.0",
+    "libsodium-wrappers": "0.7.13",
+    "superagent": "^8.1.2",
+    "typescript": "5.2.2",
+    "utf-8-validate": "6.0.3",
     "ytdl": "1.4.1",
-    "ytdl-core": "^4.11.2",
-    "zlib-sync": "0.1.7"
+    "zlib-sync": "0.1.8"
   },
   "devDependencies": {
-    "@types/node": "18.11.18",
-    "@types/superagent": "^4.1.16",
-    "nodemon": "2.0.20",
+    "@types/node": "20.8.6",
+    "@types/superagent": "^4.1.19",
+    "nodemon": "3.0.1",
     "ts-node": "10.9.1"
   }
 }
