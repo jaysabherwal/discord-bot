@@ -25,7 +25,7 @@ export default class implements Command {
                 const voiceChannel = member.voice.channel;
     
                 if (!voiceChannel) {
-                    interaction.reply(':sob: You are not in a voice channel!');
+                    interaction.editReply(':sob: You are not in a voice channel!');
                     return;
                 }
     
@@ -67,7 +67,7 @@ export default class implements Command {
             const video = await new VideoFinder().find(interaction.options.get('query').value as string);
     
             if (!video) {
-                interaction.reply('Issue finding video, please try again later');
+                interaction.editReply('Issue finding video, please try again later');
                 return;
             }
     
@@ -81,22 +81,22 @@ export default class implements Command {
             if (audioPlayer.state.status === AudioPlayerStatus.Playing || audioPlayer.state.status === AudioPlayerStatus.Buffering) {
                 console.log(`AudioPlayer is currently playing, adding song to queue`);
                 queue.push(song);
-                interaction.reply(`Added song to the queue`);
+                interaction.editReply(`Added song to the queue`);
                 return;
             } else {
                 try {
                     const resource = createAudioResource(ytdl(song.url, { filter: 'audioonly', quality: 'highestaudio' }));
                     audioPlayer.play(resource);
-                    interaction.reply(`Playing video: ${song.title || song.url}`);
+                    interaction.editReply(`Playing video: ${song.title || song.url}`);
                 } catch (error) {
                     console.error(`Error while creating audio resource`);
-                    interaction.reply(`:sob: Error playing video`);
+                    interaction.editReply(`:sob: Error playing video`);
                     return;
                 }
             }
         } catch (error) {
             console.error();
-            interaction.reply('Error playing video');
+            interaction.editReply('Error playing video');
         }
     } 
 
