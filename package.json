@@ -24,7 +24,7 @@
     "superagent": "^8.1.2",
     "typescript": "5.2.2",
     "utf-8-validate": "6.0.3",
-    "ytdl": "1.4.1",
+    "youtube-ext": "^1.1.16",
     "zlib-sync": "0.1.8"
   },
   "devDependencies": {

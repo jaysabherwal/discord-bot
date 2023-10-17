@@ -1,7 +1,6 @@
 import { SlashCommandBuilder } from '@discordjs/builders';
-import { Command } from "../util/models/command";
+import { Command, ExecuteArgs } from "../util/models/command";
 import { AudioPlayer } from "@discordjs/voice";
-import { AudioCommandInput } from "../util/models/audio-command-input";
 
 export default class implements Command {
 
@@ -9,7 +8,7 @@ export default class implements Command {
         .setName('pause')
         .setDescription('Pause bot output');
 
-    execute({ interaction, audioHandlers }: AudioCommandInput) {
+    execute({ interaction, audioHandlers }: ExecuteArgs) {
         const ap: AudioPlayer = audioHandlers.get(interaction.guildId)?.audioPlayer;
 
         if (!ap) {

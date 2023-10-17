@@ -1,6 +1,5 @@
-import { CommandInteraction } from "discord.js";
 import { SlashCommandBuilder } from '@discordjs/builders';
-import { Command } from "../util/models/command";
+import { Command, ExecuteArgs } from "../util/models/command";
 
 export default class implements Command {
 
@@ -8,7 +7,7 @@ export default class implements Command {
         .setName('ping')
         .setDescription('pong?');
 
-    execute({ interaction }: { interaction: CommandInteraction }) {
+    execute({ interaction }: ExecuteArgs) {
         interaction.reply('Pong!');
     }
 }

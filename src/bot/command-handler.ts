@@ -1,7 +1,6 @@
 import { Collection } from "discord.js";
 import { readdirSync } from "fs";
-import { AudioCommandInput } from "./util/models/audio-command-input";
-import { Command } from "./util/models/command";
+import { Command, ExecuteArgs } from "./util/models/command";
 
 export class CommandHandler {
     commands: Collection<string, Command>;
@@ -11,7 +10,7 @@ export class CommandHandler {
         this.getCommands();
     }
 
-    executeCommand = async ({ interaction, audioHandlers }: AudioCommandInput) => {
+    executeCommand = async ({ interaction, audioHandlers }: ExecuteArgs) => {
         const command = this.commands.get(interaction.commandName);
 
         if (!command) {

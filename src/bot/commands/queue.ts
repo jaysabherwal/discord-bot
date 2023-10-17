@@ -1,7 +1,6 @@
 import { EmbedBuilder, SlashCommandBuilder } from '@discordjs/builders';
-import { Command } from "../util/models/command";
+import { Command, ExecuteArgs } from "../util/models/command";
 import { Song } from '../util/models/song';
-import { AudioCommandInput } from "../util/models/audio-command-input";
 
 export default class implements Command {
 
@@ -9,7 +8,7 @@ export default class implements Command {
         .setName('queue')
         .setDescription('Display the current queue');
 
-    execute({ interaction, audioHandlers }: AudioCommandInput) {
+    execute({ interaction, audioHandlers }: ExecuteArgs) {
         let queue: Song[] = audioHandlers.get(interaction.guildId)?.queue;
 
         let desc = '';
