@@ -6,7 +6,7 @@ export default class implements Command {
 
     data = new SlashCommandBuilder()
         .setName('skip')
-        .setDescription('Skip the current song');
+        .setDescription('Skip the current item');
 
     execute({ interaction, audioHandlers }: ExecuteArgs) {
         const ap: AudioPlayer = audioHandlers.get(interaction.guildId)?.audioPlayer;
@@ -16,7 +16,7 @@ export default class implements Command {
             return;
         }
 
-        ap.stop(true) ? interaction.reply(`Successfully skipped song`) : interaction.reply(`:sob: Failed to skip song`);
+        ap.stop(true) ? interaction.reply(`Skipped`) : interaction.reply(`:sob: Failed to skip`);
     }
 }
 

@@ -1,8 +1,8 @@
 import { AudioPlayer, VoiceConnection } from "@discordjs/voice";
-import { Song } from "./song";
+import { Video } from "./video";
 
 export class AudioHandler {
     voiceConnection: VoiceConnection;
     audioPlayer: AudioPlayer;
-    queue: Song[];
+    queue: Video[];
 }
