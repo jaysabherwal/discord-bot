@@ -16,6 +16,7 @@ import ytext, { SearchVideo, VideoInfo } from "youtube-ext";
 import {
   EmbedBuilder,
 } from "discord.js";
+import ytdl from 'ytdl-core';
 
 export default class implements Command {
   data = new SlashCommandBuilder()
@@ -146,7 +147,7 @@ export default class implements Command {
 
   private async playAudio(item: Video, audioPlayer: AudioPlayer) {
     const resource = createAudioResource(
-      await ytext.getReadableStream({ url: item.url })
+      ytdl(item.url, { filter: 'audioonly' })
     );
     audioPlayer.play(resource);
   }

@@ -20,7 +20,7 @@ RUN npm install -g npm@9.8.1
 RUN apk --no-cache add --virtual .builds-deps build-base python3 git
 
 COPY package.json ./
-RUN npm install --only=production
+RUN npm install --omit=dev
 
 COPY --from=0 /usr/build .
 
