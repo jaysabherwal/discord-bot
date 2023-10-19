@@ -33,5 +33,5 @@ jobs:
         context: .
         push: true
         tags: |
-          ${{ github.repository_owner }}/discord-music-bot:latest
-          ${{ github.repository_owner }}/discord-music-bot:${{ env.TAG }}
+          ghcr.io/${{ github.repository_owner }}/discord-music-bot:latest
+          ghcr.io/${{ github.repository_owner }}/discord-music-bot:${{ env.TAG }}
