@@ -1,6 +1,7 @@
 .DS_Store
 build/
 docker-compose.yml
+.sh
 
 # Logs
 logs

@@ -1,0 +1,37 @@
+name: Docker Image CI
+
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+
+    - name: Log in to the Container Registry
+      uses: docker/login-action@v1
+      with:
+        registry: ghcr.io
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Extract version and set it to TAG env var
+      run: |
+        echo "TAG=$(jq -r '.version' package.json)" >> $GITHUB_ENV
+
+    - name: Build and push Docker image
+      uses: docker/build-push-action@f2a1d5e99d037542a71f64918e516c093c6f3fc4
+      with:
+        context: .
+        push: true
+        tags: |
+          ${{ github.repository_owner }}/discord-music-bot:latest
+          ${{ github.repository_owner }}/discord-music-bot:${{ env.TAG }}
