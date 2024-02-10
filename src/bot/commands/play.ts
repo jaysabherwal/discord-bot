@@ -11,12 +11,19 @@ import {
   VoiceConnectionStatus,
 } from "@discordjs/voice";
 import { AudioHandler } from "../util/models/audio-handler";
-import { Video } from "../util/models/video";
-import ytext, { SearchVideo, VideoInfo } from "youtube-ext";
+import { VideoInfo, VideoRequest } from "../util/models/video";
 import {
   EmbedBuilder,
 } from "discord.js";
 import ytdl from 'ytdl-core';
+import ytSearch, { YouTubeSearchOptions } from "youtube-search";
+import logger from "../util/logger";
+
+var opts: YouTubeSearchOptions = {
+  maxResults: 10,
+  type: 'video',
+  key: process.env.YOUTUBE_API_KEY
+};
 
 export default class implements Command {
   data = new SlashCommandBuilder()
@@ -60,7 +67,7 @@ export default class implements Command {
         );
 
         const audioPlayer = createAudioPlayer();
-        const queue = [];
+        const queue: VideoRequest[] = [];
 
         audioHandlers.set(guild.id, {
           voiceConnection,
@@ -72,26 +79,24 @@ export default class implements Command {
           if (queue.length > 0) {
             const item = queue.shift();
             this.playAudio(item, audioPlayer);
-            interaction.channel.send({ embeds: [this.createPlayingEmbed(item)] });
+            interaction.channel.send(`Playing ${item.title}`);
           }
         });
 
         voiceConnection.subscribe(audioPlayer);
+        logger.info(`Successfully joined channel ${voiceChannel.id}`);
       }
 
       const query = interaction.options.get("query").value as string;
 
-      let video: VideoInfo | SearchVideo = ytext.utils.isYoutubeWatchURL(query)
+      let video: VideoInfo = ytdl.validateURL(query)
         ? await this.getVideoInformation(query)
         : await this.searchVideo(query);
 
-      const item: Video = {
-        url: video.url,
-        title: decodeURIComponent(video.title),
-        duration: video.duration["lengthSec"] ? "" : video.duration["pretty"],
+      const item: VideoRequest = {
+        ...video,
         requester: interaction.user.username,
       };
-
 
       const { audioPlayer, queue } = audioHandlers.get(interaction.guildId);
 
@@ -105,47 +110,49 @@ export default class implements Command {
       } else {
         try {
           this.playAudio(item, audioPlayer);
-          interaction.editReply({ embeds: [this.createPlayingEmbed(item)] });
+          interaction.editReply(`:notes: Playing ${item.title}`);
           return;
         } catch (error) {
-          console.error(`Error while creating audio resource`, error);
+          logger.error(`Error while creating audio resource`, error);
           interaction.editReply(`:sob: Error playing video`);
           return;
         }
       }
     } catch (error) {
-      console.error("Error playing video", JSON.stringify(error));
+      logger.error("Error playing video", JSON.stringify(error));
       interaction.editReply(":sob: Error playing video, please try again");
     }
   }
 
-  private async searchVideo(query: string): Promise<SearchVideo> {
-    console.info(`Finding video for query: ${query}`);
+  private async searchVideo(query: string): Promise<VideoInfo> {
+    logger.info(`Finding video for query: ${query}`);
 
-    const response = await ytext.search(query, {
-      filterType: "video",
-    });
+    const { results } = await ytSearch(query, opts);
 
-    if (!response.videos[0]) {
+    if (!results[0]) {
       throw new Error(`Error finding video for query: ${query}`);
     } else {
-      return response.videos[0];
+      return await this.getVideoInformation(results[0].link);
     }
   }
 
   private async getVideoInformation(url: string): Promise<VideoInfo> {
-    console.info(`Finding video info for url: ${url}`);
+    logger.info(`Finding video info for url: ${url}`);
 
-    const response = await ytext.videoInfo(url);
+    const response = await ytdl.getInfo(url);
 
     if (!response) {
       throw new Error(`Error getting video info for url: ${url}`);
     } else {
-      return response;
+      return {
+        url: response.videoDetails.video_url,
+        title: response.videoDetails.title,
+        duration: response.videoDetails.lengthSeconds
+      };
     }
   }
 
-  private async playAudio(item: Video, audioPlayer: AudioPlayer) {
+  private async playAudio(item: VideoRequest, audioPlayer: AudioPlayer) {
     const resource = createAudioResource(
       ytdl(item.url, { filter: 'audioonly' })
     );
@@ -155,7 +162,7 @@ export default class implements Command {
   private addLifeCycleStateChanges(
     vc: VoiceConnection,
     audioHandlers: Map<string, AudioHandler>,
-    guildId
+    guildId: string
   ) {
     vc.on(VoiceConnectionStatus.Destroyed, () => {
       audioHandlers.delete(guildId);
@@ -173,7 +180,7 @@ export default class implements Command {
     });
   }
 
-  private createPlayingEmbed(item: Video): EmbedBuilder
+  private createPlayingEmbed(item: VideoRequest): EmbedBuilder
    {
     return new EmbedBuilder()
       .setTitle("Now Playing")
