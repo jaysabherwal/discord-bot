@@ -10,6 +10,7 @@ import { Command } from "./util/models/command";
 import { REST } from "@discordjs/rest";
 import { Routes } from "discord-api-types/v9";
 import { AudioHandler } from "./util/models/audio-handler";
+import logger from "./util/logger";
 
 export class Bot {
   client: Client;
@@ -25,11 +26,11 @@ export class Bot {
     this.audioHandlers = new Map<string, AudioHandler>();
 
     this.client.on(Events.ClientReady, () => {
-      console.info(`Logged in as ${this.client.user.tag}`);
+      logger.info(`Logged in as ${this.client.user.tag}`);
     });
 
     this.client.on(Events.ShardDisconnect, () => {
-      console.info(`Disconnected...`);
+      logger.info(`Disconnected...`);
     });
 
     this.login();
@@ -38,7 +39,7 @@ export class Bot {
   }
 
   private login() {
-    this.client.login(process.env.DISCORD_TOKEN).catch((e) => console.log(e));
+    this.client.login(process.env.DISCORD_TOKEN).catch((e) => logger.log(e));
   }
 
   private registerCommands(commands: Collection<string, Command>) {
@@ -60,22 +61,22 @@ export class Bot {
           { body: toRegister }
         )
         .then(() =>
-          console.log(
+          logger.info(
             `Successfully registered application commands in DEVELOPMENT for guild: ${process.env.GUILD_ID}.`
           )
         )
-        .catch(console.error);
+        .catch(logger.error);
     } else {
       rest
         .put(Routes.applicationCommands(process.env.CLIENT_ID), {
           body: toRegister,
         })
         .then(() =>
-          console.log(
+          logger.info(
             "Successfully registered application commands in PRODUCTION."
           )
         )
-        .catch(console.error);
+        .catch(logger.error);
     }
   }
 
@@ -83,7 +84,12 @@ export class Bot {
     this.client.on(
       Events.InteractionCreate,
       async (interaction: Interaction) => {
-        console.info(`Interaction created [id: ${interaction.id}]`);
+        logger.defaultMeta = {
+          interactionId: interaction.id
+        }
+
+        logger.info(`Interaction created [id: ${interaction.id}]`);
+
         if (!interaction.isCommand()) {
           return;
         }

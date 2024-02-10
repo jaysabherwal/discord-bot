@@ -17,6 +17,7 @@ import {
 } from "discord.js";
 import ytdl from 'ytdl-core';
 import ytSearch, { YouTubeSearchOptions } from "youtube-search";
+import logger from "../util/logger";
 
 var opts: YouTubeSearchOptions = {
   maxResults: 10,
@@ -66,7 +67,7 @@ export default class implements Command {
         );
 
         const audioPlayer = createAudioPlayer();
-        const queue = [];
+        const queue: VideoRequest[] = [];
 
         audioHandlers.set(guild.id, {
           voiceConnection,
@@ -78,12 +79,12 @@ export default class implements Command {
           if (queue.length > 0) {
             const item = queue.shift();
             this.playAudio(item, audioPlayer);
-            interaction.channel.send({ embeds: [this.createPlayingEmbed(item)] });
+            interaction.channel.send(`Playing ${item.title}`);
           }
         });
 
         voiceConnection.subscribe(audioPlayer);
-        console.log(`Successfully joined channel ${voiceChannel.id}`);
+        logger.info(`Successfully joined channel ${voiceChannel.id}`);
       }
 
       const query = interaction.options.get("query").value as string;
@@ -112,35 +113,31 @@ export default class implements Command {
           interaction.editReply(`:notes: Playing ${item.title}`);
           return;
         } catch (error) {
-          console.error(`Error while creating audio resource`, error);
+          logger.error(`Error while creating audio resource`, error);
           interaction.editReply(`:sob: Error playing video`);
           return;
         }
       }
     } catch (error) {
-      console.error("Error playing video", JSON.stringify(error));
+      logger.error("Error playing video", JSON.stringify(error));
       interaction.editReply(":sob: Error playing video, please try again");
     }
   }
 
   private async searchVideo(query: string): Promise<VideoInfo> {
-    console.info(`Finding video for query: ${query}`);
+    logger.info(`Finding video for query: ${query}`);
 
     const { results } = await ytSearch(query, opts);
 
     if (!results[0]) {
       throw new Error(`Error finding video for query: ${query}`);
     } else {
-      return {
-        url: results[0].link,
-        duration: 'Could not retrieve',
-        title: results[0].title
-      };
+      return await this.getVideoInformation(results[0].link);
     }
   }
 
   private async getVideoInformation(url: string): Promise<VideoInfo> {
-    console.info(`Finding video info for url: ${url}`);
+    logger.info(`Finding video info for url: ${url}`);
 
     const response = await ytdl.getInfo(url);
 
