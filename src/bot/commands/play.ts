@@ -31,7 +31,7 @@ export default class implements Command {
 
   async execute({ interaction, audioHandlers }: ExecuteArgs) {
     try {
-      interaction.deferReply();
+      await interaction.deferReply();
 
       let voiceConnection = audioHandlers.get(
         interaction.guildId
