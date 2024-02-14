@@ -12,9 +12,6 @@ import {
 } from "@discordjs/voice";
 import { AudioHandler } from "../util/models/audio-handler";
 import { VideoInfo, VideoRequest } from "../util/models/video";
-import {
-  EmbedBuilder,
-} from "discord.js";
 import ytdl from 'ytdl-core';
 import ytSearch, { YouTubeSearchOptions } from "youtube-search";
 import logger from "../util/logger";
@@ -22,7 +19,8 @@ import logger from "../util/logger";
 var opts: YouTubeSearchOptions = {
   maxResults: 10,
   type: 'video',
-  key: process.env.YOUTUBE_API_KEY
+  key: process.env.YOUTUBE_API_KEY,
+  videoCategoryId: '10'
 };
 
 export default class implements Command {
@@ -127,7 +125,10 @@ export default class implements Command {
   private async searchVideo(query: string): Promise<VideoInfo> {
     logger.info(`Finding video for query: ${query}`);
 
-    const { results } = await ytSearch(query, opts);
+    /** 
+     * Adding lyrics to the end of the query to prevent music videos from appearing
+     */
+    const { results } = await ytSearch(`${query} lyrics`, opts);
 
     if (!results[0]) {
       throw new Error(`Error finding video for query: ${query}`);
@@ -178,17 +179,5 @@ export default class implements Command {
         vc.destroy();
       }
     });
-  }
-
-  private createPlayingEmbed(item: VideoRequest): EmbedBuilder
-   {
-    return new EmbedBuilder()
-      .setTitle("Now Playing")
-      .setColor("#0000FF")
-      .setDescription(item.title)
-      .addFields(
-        { name: "Duration", value: item.duration },
-        { name: "", value: "" }
-      );
   }
 }
