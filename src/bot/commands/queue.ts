@@ -8,7 +8,7 @@ export default class implements Command {
         .setName('queue')
         .setDescription('Display the current queue');
 
-    execute({ interaction, audioHandlers }: ExecuteArgs) {
+    async execute({ interaction, audioHandlers }: ExecuteArgs) {
         let queue: VideoRequest[] = audioHandlers.get(interaction.guildId)?.queue;
 
         let desc = '';
@@ -18,11 +18,11 @@ export default class implements Command {
                 desc += `${index + 1}. ${item.title} \n`
             });    
         } else {
-            desc += 'Empty!'
+            return await interaction.reply('Nothing in the queue! Use the play command to add songs.');
         }
 
         const embed = new EmbedBuilder().setTitle('Queue').setDescription(desc);
-        interaction.reply({ embeds: [embed] });
+        return await interaction.reply({ embeds: [embed] });
     }
 }
 

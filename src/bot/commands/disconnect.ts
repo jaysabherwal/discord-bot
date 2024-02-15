@@ -8,17 +8,16 @@ export default class implements Command {
         .setName('disconnect')
         .setDescription('Disconnect the bot from the voice channel');
 
-    execute({ interaction, audioHandlers }: ExecuteArgs) {
+    async execute({ interaction, audioHandlers }: ExecuteArgs) {
         const vc: VoiceConnection = audioHandlers.get(interaction.guildId)?.voiceConnection;
         const username = interaction.client.user.username;
 
         if (!vc) {
-            interaction.reply(`${username} is not in a voice channel`);
-            return;
+            return await interaction.reply(`${username} is not in a voice channel`);
         }
         
         vc.destroy(true);
-        interaction.reply(`${username} successfully disconnected!`);
+        return await interaction.reply(`Successfully disconnected!`);
     }
 }
 

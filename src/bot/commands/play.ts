@@ -126,7 +126,7 @@ export default class implements Command {
     logger.info(`Finding video for query: ${query}`);
 
     /** 
-     * Adding lyrics to the end of the query to prevent music videos from appearing
+     * Adding lyrics to the end of the query to prevent music videos from appearing for now
      */
     const { results } = await ytSearch(`${query} lyrics`, opts);
 
@@ -166,6 +166,7 @@ export default class implements Command {
     guildId: string
   ) {
     vc.on(VoiceConnectionStatus.Destroyed, () => {
+      audioHandlers.get(guildId).audioPlayer.stop();
       audioHandlers.delete(guildId);
     });
 

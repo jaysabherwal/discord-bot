@@ -8,11 +8,11 @@ export default class implements Command {
         .setName('clear')
         .setDescription('Clears the queue');
 
-    execute({ interaction, audioHandlers }: ExecuteArgs) {
+    async execute({ interaction, audioHandlers }: ExecuteArgs) {
         let queue: VideoRequest[] = audioHandlers.get(interaction.guildId)?.queue;
 
         queue = [];
-        interaction.reply(':page_facing_up: Queue cleared');
+        return interaction.reply(':page_facing_up: Queue cleared');
     }
 }
 

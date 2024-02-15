@@ -8,15 +8,15 @@ export default class implements Command {
         .setName('resume')
         .setDescription('Resume playback');
 
-    execute({ interaction, audioHandlers }: ExecuteArgs) {
+    async execute({ interaction, audioHandlers }: ExecuteArgs) {
         const ap: AudioPlayer = audioHandlers.get(interaction.guildId)?.audioPlayer;
 
         if (!ap) {
-            interaction.reply(':sob: Bot was not playing anything');
+            return await interaction.reply(':sob: Bot was not playing anything');
             return;
         }
 
-        ap.unpause() ? interaction.reply('Resumed!') : interaction.reply('Failed to resume audio');
+        return ap.unpause() ? await interaction.reply('Resumed!') : await interaction.reply('Failed to resume audio');
     }
 }
 

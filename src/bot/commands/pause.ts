@@ -8,15 +8,14 @@ export default class implements Command {
         .setName('pause')
         .setDescription('Pause bot output');
 
-    execute({ interaction, audioHandlers }: ExecuteArgs) {
+    async execute({ interaction, audioHandlers }: ExecuteArgs) {
         const ap: AudioPlayer = audioHandlers.get(interaction.guildId)?.audioPlayer;
 
         if (!ap) {
-            interaction.reply(`:sob: ${interaction.client.user.username} is not playing anything`);
-            return;
+            return await interaction.reply(`:sob: ${interaction.client.user.username} is not playing anything`);
         }
         
-        ap.pause() ? interaction.reply('Paused!') : interaction.reply('Failed to pause audio');
+        return ap.pause() ? await interaction.reply('Paused!') : await interaction.reply('Failed to pause audio');
     }
 }
 

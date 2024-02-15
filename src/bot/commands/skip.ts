@@ -8,15 +8,14 @@ export default class implements Command {
         .setName('skip')
         .setDescription('Skip the current item');
 
-    execute({ interaction, audioHandlers }: ExecuteArgs) {
+    async execute({ interaction, audioHandlers }: ExecuteArgs) {
         const ap: AudioPlayer = audioHandlers.get(interaction.guildId)?.audioPlayer;
 
         if (!ap) {
-            interaction.reply(`:sob: ${interaction.client.user.username} is not playing anything`);
-            return;
+            return await interaction.reply(`:sob: ${interaction.client.user.username} is not playing anything`);
         }
 
-        ap.stop(true) ? interaction.reply(`Skipped`) : interaction.reply(`:sob: Failed to skip`);
+        return ap.stop(true) ? await interaction.reply(`Skipped`) : await interaction.reply(`:sob: Failed to skip`);
     }
 }
 

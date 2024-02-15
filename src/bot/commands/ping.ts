@@ -7,8 +7,8 @@ export default class implements Command {
         .setName('ping')
         .setDescription('pong?');
 
-    execute({ interaction }: ExecuteArgs) {
-        interaction.reply('Pong!');
+    async execute({ interaction }: ExecuteArgs) {
+        return await interaction.reply('Pong!');
     }
 }
 
