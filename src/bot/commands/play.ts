@@ -12,16 +12,10 @@ import {
 } from "@discordjs/voice";
 import { AudioHandler } from "../util/models/audio-handler";
 import { VideoInfo, VideoRequest } from "../util/models/video";
-import ytdl from 'ytdl-core';
-import ytSearch, { YouTubeSearchOptions } from "youtube-search";
+import { YouTubeVideo, stream, video_basic_info, yt_validate } from "play-dl";
+import { ytmusic } from "../util/yt-music";
+import { SongDetailed } from "ytmusic-api";
 import logger from "../util/logger";
-
-var opts: YouTubeSearchOptions = {
-  maxResults: 10,
-  type: 'video',
-  key: process.env.YOUTUBE_API_KEY,
-  videoCategoryId: '10'
-};
 
 export default class implements Command {
   data = new SlashCommandBuilder()
@@ -35,9 +29,8 @@ export default class implements Command {
     .setName("play");
 
   async execute({ interaction, audioHandlers }: ExecuteArgs) {
+    await interaction.deferReply();
     try {
-      await interaction.deferReply();
-
       let voiceConnection = audioHandlers.get(
         interaction.guildId
       )?.voiceConnection;
@@ -48,9 +41,12 @@ export default class implements Command {
         const voiceChannel = member.voice.channel;
 
         if (!voiceChannel) {
-          interaction.editReply(":sob: You are not in a voice channel!");
-          return;
+          return await interaction.editReply(
+            ":sob: You are not in a voice channel!"
+          );
         }
+
+        await interaction.editReply("Joining voice channel...");
 
         voiceConnection = joinVoiceChannel({
           channelId: voiceChannel.id,
@@ -77,7 +73,9 @@ export default class implements Command {
           if (queue.length > 0) {
             const item = queue.shift();
             this.playAudio(item, audioPlayer);
-            interaction.channel.send(`Playing ${item.title}`);
+            interaction.channel.send(
+              `:notes: Playing \`${item.title}\` by \`${item.artist}\``
+            );
           }
         });
 
@@ -87,9 +85,12 @@ export default class implements Command {
 
       const query = interaction.options.get("query").value as string;
 
-      let video: VideoInfo = ytdl.validateURL(query)
-        ? await this.getVideoInformation(query)
-        : await this.searchVideo(query);
+      await interaction.editReply("Searching...");
+
+      let video: VideoInfo =
+        query.startsWith("https") && yt_validate(query) == "video"
+          ? await this.getVideoInformationFromUrl(query)
+          : await this.getVideoInformationFromQuery(query);
 
       const item: VideoRequest = {
         ...video,
@@ -103,60 +104,101 @@ export default class implements Command {
         audioPlayer.state.status === AudioPlayerStatus.Buffering
       ) {
         queue.push(item);
-        interaction.editReply(`:notes: Added ${item.title} to the queue`);
-        return;
+        return await interaction.editReply(
+          `:notes: Added \`${item.title}\` by \`${item.artist}\` to the queue`
+        );
       } else {
         try {
           this.playAudio(item, audioPlayer);
-          interaction.editReply(`:notes: Playing ${item.title}`);
-          return;
+          return await interaction.editReply(`:notes: Playing ${item.title}`);
         } catch (error) {
           logger.error(`Error while creating audio resource`, error);
-          interaction.editReply(`:sob: Error playing video`);
-          return;
+          return await interaction.editReply(`:sob: Error playing video`);
         }
       }
     } catch (error) {
       logger.error("Error playing video", JSON.stringify(error));
-      interaction.editReply(":sob: Error playing video, please try again");
+      return await interaction.editReply(
+        ":sob: Error playing video, please try again"
+      );
     }
   }
 
-  private async searchVideo(query: string): Promise<VideoInfo> {
+  private searchVideo = async (query: string): Promise<SongDetailed> => {
     logger.info(`Finding video for query: ${query}`);
 
-    /** 
-     * Adding lyrics to the end of the query to prevent music videos from appearing for now
-     */
-    const { results } = await ytSearch(`${query} lyrics`, opts);
+    const songs = await ytmusic.searchSongs(query);
 
-    if (!results[0]) {
+    if (songs.length === 0) {
       throw new Error(`Error finding video for query: ${query}`);
     } else {
-      return await this.getVideoInformation(results[0].link);
+      return songs[0];
     }
-  }
+  };
 
-  private async getVideoInformation(url: string): Promise<VideoInfo> {
-    logger.info(`Finding video info for url: ${url}`);
+  private getArtistFromVideoId = async (videoId: string): Promise<string> => {
+    logger.info(`Finding arstist for video id: ${videoId}`);
 
-    const response = await ytdl.getInfo(url);
+    const song = await ytmusic.getSong(videoId);
 
-    if (!response) {
-      throw new Error(`Error getting video info for url: ${url}`);
+    if (!song && !song.artist) {
+      throw new Error(`Error finding artist for video id: ${videoId}`);
     } else {
-      return {
-        url: response.videoDetails.video_url,
-        title: response.videoDetails.title,
-        duration: response.videoDetails.lengthSeconds
-      };
+      return song.artist.name;
     }
+  };
+
+  private getVideoInformation = async (url: string): Promise<YouTubeVideo> => {
+    const information = await video_basic_info(url);
+
+    if (!information) {
+      throw new Error(`Error getting video inforamtion for url: ${url}`);
+    } else {
+      return information.video_details;
+    }
+  };
+
+  private getVideoInformationFromQuery = async (
+    query: string
+  ): Promise<VideoInfo> => {
+    logger.info(`Finding video info for query: ${query}`);
+
+    const song = await this.searchVideo(query);
+    const information = await this.getVideoInformation(
+      `https://www.youtube.com/watch?v=${song.videoId}`
+    );
+
+    return {
+      url: information.url,
+      title: information.title,
+      duration: information.durationInSec,
+      artist: song.artist.name,
+    };
+  };
+
+  private async getVideoInformationFromUrl(url: string): Promise<VideoInfo> {
+    logger.info(`Getting video information for url: ${url}`);
+
+    const information = await this.getVideoInformation(url);
+    const artist = await this.getArtistFromVideoId(information.id);
+
+    return {
+      url: information.url,
+      title: information.title,
+      duration: information.durationInSec,
+      artist: artist,
+    };
   }
 
   private async playAudio(item: VideoRequest, audioPlayer: AudioPlayer) {
-    const resource = createAudioResource(
-      ytdl(item.url, { filter: 'audioonly' })
-    );
+    const playStream = await stream(item.url);
+    const resource = createAudioResource(playStream.stream, {
+      inputType: playStream.type,
+      inlineVolume: true,
+      metadata: {
+        ...item,
+      },
+    });
     audioPlayer.play(resource);
   }
 
@@ -166,11 +208,10 @@ export default class implements Command {
     guildId: string
   ) {
     vc.on(VoiceConnectionStatus.Destroyed, () => {
-      audioHandlers.get(guildId).audioPlayer.stop();
       audioHandlers.delete(guildId);
     });
 
-    vc.on(VoiceConnectionStatus.Disconnected, async (oldState, newState) => {
+    vc.on(VoiceConnectionStatus.Disconnected, async (_oldState, _newState) => {
       try {
         await Promise.race([
           entersState(vc, VoiceConnectionStatus.Signalling, 5_000),

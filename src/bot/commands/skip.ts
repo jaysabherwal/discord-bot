@@ -15,7 +15,7 @@ export default class implements Command {
             return await interaction.reply(`:sob: ${interaction.client.user.username} is not playing anything`);
         }
 
-        return ap.stop(true) ? await interaction.reply(`Skipped`) : await interaction.reply(`:sob: Failed to skip`);
+        return ap.stop(true) ? await interaction.reply(`:track_next: Skipped`) : await interaction.reply(`:sob: Failed to skip`);
     }
 }
 

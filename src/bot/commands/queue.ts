@@ -15,7 +15,7 @@ export default class implements Command {
         
         if (queue) {
             queue.forEach((item, index) => {
-                desc += `${index + 1}. ${item.title} \n`
+                desc += `[${++index}] \`${item.title}\` by \`${item.artist}\` (${item.duration}) \n`
             });    
         } else {
             return await interaction.reply('Nothing in the queue! Use the play command to add songs.');

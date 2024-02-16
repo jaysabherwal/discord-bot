@@ -11,6 +11,7 @@ import { REST } from "@discordjs/rest";
 import { Routes } from "discord-api-types/v9";
 import { AudioHandler } from "./util/models/audio-handler";
 import logger from "./util/logger";
+import { initialiseYtMusic } from "./util/yt-music";
 
 export class Bot {
   client: Client;
@@ -32,6 +33,8 @@ export class Bot {
     this.client.on(Events.ShardDisconnect, () => {
       logger.info(`Disconnected...`);
     });
+
+    initialiseYtMusic();
 
     this.login();
     this.registerCommands(commandHandler.commands);
