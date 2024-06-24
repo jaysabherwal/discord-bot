@@ -1,10 +1,11 @@
-import { SlashCommandBuilder } from "@discordjs/builders";
+import { SlashCommandOptionsOnlyBuilder } from "@discordjs/builders";
 import { AudioHandler } from "./audio-handler";
-import { CommandInteraction } from "discord.js";
+import { AutocompleteInteraction, CommandInteraction } from "discord.js";
 
 export interface Command {
-    data: SlashCommandBuilder;
+    data: SlashCommandOptionsOnlyBuilder;
     execute(args: ExecuteArgs): void;
+    autoComplete?(interaction: AutocompleteInteraction): void;
 }
 
 export interface ExecuteArgs {

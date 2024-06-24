@@ -1,6 +1,6 @@
 import { EmbedBuilder, SlashCommandBuilder } from '@discordjs/builders';
 import { Command, ExecuteArgs } from "../util/models/command";
-import { VideoRequest } from '../util/models/video';
+import { SongRequest } from '../util/models/song';
 
 export default class implements Command {
 
@@ -9,7 +9,7 @@ export default class implements Command {
         .setDescription('Display the current queue');
 
     async execute({ interaction, audioHandlers }: ExecuteArgs) {
-        let queue: VideoRequest[] = audioHandlers.get(interaction.guildId)?.queue;
+        let queue: SongRequest[] = audioHandlers.get(interaction.guildId)?.queue;
 
         let desc = '';
         

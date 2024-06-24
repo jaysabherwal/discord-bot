@@ -7,25 +7,28 @@ import {
   createAudioResource,
   entersState,
   joinVoiceChannel,
+  StreamType,
   VoiceConnection,
   VoiceConnectionStatus,
 } from "@discordjs/voice";
 import { AudioHandler } from "../util/models/audio-handler";
-import { VideoInfo, VideoRequest } from "../util/models/video";
-import { YouTubeVideo, stream, video_basic_info, yt_validate } from "play-dl";
-import { ytmusic } from "../util/yt-music";
-import { SongDetailed } from "ytmusic-api";
-import logger from "../util/logger";
+import { SongInfo, SongRequest } from "../util/models/song";
+import { logger } from "../util/logger";
+import { AutocompleteInteraction } from "discord.js";
+import { spotify_api } from "../util/api/spotify";
+import YouTube from "youtube-sr";
+import DiscordYTDLCore from "discord-ytdl-core";
 
 export default class implements Command {
   data = new SlashCommandBuilder()
     .addStringOption((opt) =>
       opt
         .setName("query")
-        .setDescription("The URL or name of the video you want to play")
+        .setDescription("Song name you want to search for")
         .setRequired(true)
+        .setAutocomplete(true)
     )
-    .setDescription("Play the sound of a video from YouTube")
+    .setDescription("Play a song")
     .setName("play");
 
   async execute({ interaction, audioHandlers }: ExecuteArgs) {
@@ -61,7 +64,7 @@ export default class implements Command {
         );
 
         const audioPlayer = createAudioPlayer();
-        const queue: VideoRequest[] = [];
+        const queue: SongRequest[] = [];
 
         audioHandlers.set(guild.id, {
           voiceConnection,
@@ -83,17 +86,18 @@ export default class implements Command {
         logger.info(`Successfully joined channel ${voiceChannel.id}`);
       }
 
-      const query = interaction.options.get("query").value as string;
-
       await interaction.editReply("Searching...");
 
-      let video: VideoInfo =
-        query.startsWith("https") && yt_validate(query) == "video"
-          ? await this.getVideoInformationFromUrl(query)
-          : await this.getVideoInformationFromQuery(query);
+      const query = interaction.options.get("query").value as string;
 
-      const item: VideoRequest = {
-        ...video,
+      const query_parts = query.split('/');
+
+      const song: SongInfo = await spotify_api.getTrackInfo(query_parts[query_parts.length - 1]);
+      const yt_data = await YouTube.searchOne(`${song.title} - ${song.artist}`);
+
+      const item: SongRequest = {
+        ...song,
+        url: yt_data.url,
         requester: interaction.user.username,
       };
 
@@ -124,76 +128,25 @@ export default class implements Command {
     }
   }
 
-  private searchVideo = async (query: string): Promise<SongDetailed> => {
-    logger.info(`Finding video for query: ${query}`);
+  async autoComplete(interaction: AutocompleteInteraction) {
+    const focusedValue = interaction.options.getFocused();
+    const songs = await spotify_api.getTracks(focusedValue);
 
-    const songs = await ytmusic.searchSongs(query);
-
-    if (songs.length === 0) {
-      throw new Error(`Error finding video for query: ${query}`);
-    } else {
-      return songs[0];
-    }
+    const choices = songs.map((song) => ({
+      name: `${song.title} - ${song.artist}`,
+      value: song.url
+    }));
+    await interaction.respond(choices);
   };
 
-  private getArtistFromVideoId = async (videoId: string): Promise<string> => {
-    logger.info(`Finding arstist for video id: ${videoId}`);
+  private async playAudio(item: SongRequest, audioPlayer: AudioPlayer) {
+    const playStream = DiscordYTDLCore(item.url, {
+      filter: 'audioonly',
+      opusEncoded: true
+    });
 
-    const song = await ytmusic.getSong(videoId);
-
-    if (!song && !song.artist) {
-      throw new Error(`Error finding artist for video id: ${videoId}`);
-    } else {
-      return song.artist.name;
-    }
-  };
-
-  private getVideoInformation = async (url: string): Promise<YouTubeVideo> => {
-    const information = await video_basic_info(url);
-
-    if (!information) {
-      throw new Error(`Error getting video inforamtion for url: ${url}`);
-    } else {
-      return information.video_details;
-    }
-  };
-
-  private getVideoInformationFromQuery = async (
-    query: string
-  ): Promise<VideoInfo> => {
-    logger.info(`Finding video info for query: ${query}`);
-
-    const song = await this.searchVideo(query);
-    const information = await this.getVideoInformation(
-      `https://www.youtube.com/watch?v=${song.videoId}`
-    );
-
-    return {
-      url: information.url,
-      title: information.title,
-      duration: information.durationInSec,
-      artist: song.artist.name,
-    };
-  };
-
-  private async getVideoInformationFromUrl(url: string): Promise<VideoInfo> {
-    logger.info(`Getting video information for url: ${url}`);
-
-    const information = await this.getVideoInformation(url);
-    const artist = await this.getArtistFromVideoId(information.id);
-
-    return {
-      url: information.url,
-      title: information.title,
-      duration: information.durationInSec,
-      artist: artist,
-    };
-  }
-
-  private async playAudio(item: VideoRequest, audioPlayer: AudioPlayer) {
-    const playStream = await stream(item.url);
-    const resource = createAudioResource(playStream.stream, {
-      inputType: playStream.type,
+    const resource = createAudioResource(playStream, {
+      inputType: StreamType.Opus,
       inlineVolume: true,
       metadata: {
         ...item,

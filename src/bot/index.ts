@@ -10,8 +10,7 @@ import { Command } from "./util/models/command";
 import { REST } from "@discordjs/rest";
 import { Routes } from "discord-api-types/v9";
 import { AudioHandler } from "./util/models/audio-handler";
-import logger from "./util/logger";
-import { initialiseYtMusic } from "./util/yt-music";
+import { logger } from "./util/logger";
 
 export class Bot {
   client: Client;
@@ -34,23 +33,21 @@ export class Bot {
       logger.info(`Disconnected...`);
     });
 
-    initialiseYtMusic();
-
     this.login();
     this.registerCommands(commandHandler.commands);
     this.startListening(commandHandler);
   }
 
   private login() {
-    this.client.login(process.env.DISCORD_TOKEN).catch((e) => logger.log(e));
+    this.client
+      .login(process.env.DISCORD_TOKEN)
+      .catch((err) => logger.error(err));
   }
 
   private registerCommands(commands: Collection<string, Command>) {
-    const toRegister = commands.map((command) => {
-      return command.data.toJSON();
-    });
+    const toRegister = commands.map((command) => command.data.toJSON());
 
-    const rest = new REST({ version: "10" }).setToken(
+    const rest = new REST().setToken(
       process.env.DISCORD_TOKEN
     );
 
@@ -87,20 +84,22 @@ export class Bot {
     this.client.on(
       Events.InteractionCreate,
       async (interaction: Interaction) => {
-        logger.defaultMeta = {
-          interactionId: interaction.id
-        }
+        logger.child({
+          interactionId: interaction.id,
+        });
 
         logger.info(`Interaction created [id: ${interaction.id}]`);
 
-        if (!interaction.isCommand()) {
-          return;
+        if (interaction.isCommand()) {
+          commandHandler.executeCommand({
+            interaction,
+            audioHandlers: this.audioHandlers,
+          });
         }
 
-        commandHandler.executeCommand({
-          interaction,
-          audioHandlers: this.audioHandlers,
-        });
+        if (interaction.isAutocomplete()) {
+          commandHandler.executeAutoComplete(interaction);
+        }
       }
     );
   }

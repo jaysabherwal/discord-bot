@@ -1,11 +1,6 @@
-import { createLogger, format, transports } from "winston";
+import pino from "pino";
 
-const logger = createLogger({
-  level: "info",
-  format: format.combine(format.timestamp(), format.json()),
-  transports: [
-    new transports.Console({ level: 'info' })
-  ]
+export const logger = pino({
+  name: 'four-backend',
+  level: 'debug'
 });
-
-export default logger;
