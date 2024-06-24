@@ -30,7 +30,6 @@
     "utf-8-validate": "6.0.3",
     "youtube-sr": "^4.3.11",
     "ytdl-core": "^4.11.5",
-    "ytmusic-api": "^5.2.1",
     "zlib-sync": "0.1.8"
   },
   "devDependencies": {
